@@ -1,0 +1,3 @@
+[submodule "project/StepanTestScriptLibrary"]
+	path = project/StepanTestScriptLibrary
+	url = git@github.com:khosta77/StepanTestScriptLibrary.git
