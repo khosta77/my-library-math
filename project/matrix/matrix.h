@@ -1,14 +1,17 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-#include <vector>
+//#include <vector>
 #include <istream>
 #include <iomanip>
 #include <cmath>
 #include <limits>
-#include <stdexcept>
+//#include <stdexcept>
 
-/* @class Matrix
+/* @class Matrix класс матрицы двумерной. Различные операции для расчетов
+ * @param rows Строки
+ * @param cols Колонки
+ * @param matrix Массив элементов матрицы
  * */
 class Matrix {
 private:
@@ -16,6 +19,13 @@ private:
     size_t cols;
     double *matrix;
 
+    /** @brief Метод возвращает знак из матрицы знаков
+     *  @param x позиция элемента
+     *  @return Знак матрицы матрицы знаков
+     * */
+    static int sign(size_t x) {
+        return (((x % 2) == 0) ? 1 : -1);
+    }
 public:
     /** @defgroup Базовые операции
      *  В данной группе содержатся различные конструкторы, оператор присваивания, а так же методы
@@ -205,7 +215,17 @@ public:
      *  @return Умноженные матрицы, если не возможно вернуть nullptr
      * */
     Matrix operator*(const Matrix &rhs) const noexcept {
-
+        if (cols != rhs.rows)
+            return nullptr;
+            // throw DimensionMismatch(*this, rhs);
+        Matrix new_matrix(rows, rhs.cols);
+        for (size_t i = 0; i < rows; ++i)
+            for (size_t j = 0; j < rhs.cols; ++j)
+                for (size_t k = 0; k < cols; ++k)
+                    new_matrix.matrix[(j + (i * new_matrix.cols))] = (
+                            new_matrix.matrix[(j + (i * new_matrix.cols))]
+                            + (matrix[(k + (i * cols))] * rhs.matrix[(j + (k * rhs.cols))]));
+        return new_matrix;
     }
 
     /** @brief Умножить матрицу на определнный элемент
@@ -213,7 +233,10 @@ public:
      *  @return Matrix * val, если не возможно вернуть nullptr
      * */
     Matrix operator*(double val) const noexcept {
-
+        Matrix new_matrix(rows, cols);
+        for (size_t i = 0, size = (rows * cols); i < size; ++i)
+            new_matrix.matrix[i] = (matrix[i] * val);
+        return new_matrix;
     }
 
     /** @brief Умножить матрицу на определнный элемент
@@ -236,35 +259,81 @@ public:
      *  @return Возвращает матрицу минора выбранного элемента, если элемент не в границах, вернуть nullptr
      * */
     Matrix minor(size_t row, size_t col) const noexcept {
-
+        Matrix minor((rows - 1), (cols - 1));
+        for (size_t l = 0, R = (rows - 1); l < R; ++l) {
+            for (size_t k = 0, C = (cols - 1); k < C; ++k) {
+                const size_t row_offset = (l >= row);
+                const size_t col_offset = (k >= col);
+                minor.matrix[k + l * minor.cols] = matrix[(k + col_offset) + (l + row_offset) * cols];
+            }
+        }
+        return minor;
     }
 
     /** @brief Транспонирование матрицы
      *  @return Возвращает транспонированную матрицу, если нельзя взять, вернуть nullptr
      * */
     Matrix transp() const noexcept {
-
+        Matrix tra_mtx( cols, rows);
+        for (size_t i = 0; i < cols; ++i)
+            for (size_t j = 0; j < rows; ++j)
+                tra_mtx.matrix[(j + (i * tra_mtx.cols))] = matrix[(i + (j * cols))];
+        return tra_mtx;
     }
 
     /** @brief Вычисление определителя матрицы
      *  @return Возвращает определитель матрицы, считать, что берем всегда у квадратной, в противном случае 0
      * */
     double det() const noexcept {
+        if (cols != rows)
+            return std::numeric_limits<double>::min();
+            // throw DimensionMismatch(*this);
 
+        if ((rows == 1))
+            return matrix[0];
+    
+        if ((rows == 2))
+            return ((matrix[0] * matrix[3]) - (matrix[2] * matrix[1]));
+        
+        double determinant = 0, v = 0;
+        for (size_t k = 0; k < cols; ++k) {
+            v = this->minor(0, k).det();
+            determinant += (sign(k) * matrix[k] * v);
+        }
+        return determinant;
     }
     
     /** @brief Получает присоединенную матрицу
      *  @return Возвращает присоединенную матрицу, если нельзя взять, вернуть nullptr
      * */
     Matrix adj() const noexcept {
+        if (this->det() == 0)
+            return nullptr;
+            // throw SingularMatrix();
 
+        Matrix adj_matrix(rows, cols);
+        Matrix transp_matrix = this->transp();
+        for (size_t i = 0; i < transp_matrix.rows; ++i)
+            for (size_t j = 0; j < transp_matrix.cols; ++j)
+                adj_matrix.matrix[((i * transp_matrix.rows) + j)] = (sign(i + j)
+                    * transp_matrix.minor(i, j).det());
+        return adj_matrix;
     }
 
     /** @brief Обратная матрица
      *  @return Возвращает обратную матрицу, если нельзя взять, вернуть nullptr
      * */
     Matrix inv() const noexcept {
+        if (cols != rows)
+            return nullptr;
+            // throw DimensionMismatch(*this);
+        
+        double determinant = this->det();
+        if (determinant == 0)
+            return nullptr;
+            // throw SingularMatrix();
 
+        return (this->adj() * (1 / determinant));
     }
 
     /** @} */ // Конец группы: Дополнительные операции над матрицами
@@ -277,12 +346,16 @@ public:
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
 
-Matrix operator*(double val, const Matrix& matrix) {
-
+std::ostream& operator<<(std::ostream &os, const Matrix &matrix) {
+    os << matrix.rows << ' ' << matrix.cols << '\n';
+    for (size_t i = 0, size = (matrix.rows * matrix.cols); i < size; ++i)
+        os << std::setprecision(std::numeric_limits<double>::max_digits10) << matrix.matrix[i] << ' ';
+    os << '\n';
+    return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
-
+Matrix operator*(double val, const Matrix &matrix) {
+    return (matrix * val);
 }
 
 #endif  // _MATRIX_H_
