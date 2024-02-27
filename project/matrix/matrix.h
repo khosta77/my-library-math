@@ -73,7 +73,7 @@ public:
     /** @brief Конструктор копирования
      *  @param rhs Другая матрица, если равна nullptr, то тогда матрица 0x0
      * */
-    Matrix(const Matrix &rhs) noexcept {
+    Matrix(Matrix &rhs) noexcept {
         rows = rhs.getRows();
         cols = rhs.getCols();
         matrix = new double[(rows * cols)];
@@ -127,6 +127,10 @@ public:
         return cols;
     }
 
+    bool isNull() const noexcept {
+        return ((cols == 0) || (rows == 0));
+    }
+
     /** @brief Спомощью такой перегруженной функциональные формы происходит 
      *         извлечение элемента без его изменения.
      *  @param i номер строки, если не входит в границы, вернуть 0
@@ -135,7 +139,7 @@ public:
      * */
     double operator()(size_t i, size_t j) const noexcept {
         if (((i >= rows) || (j >= cols)))
-            return 0;
+            return 0.0;
             // throw OutOfRange(i, j, *this);
         return matrix[(j + (i * cols))];
     }
@@ -146,10 +150,10 @@ public:
      *  @param j номер колонки, если не входит в границы, вернуть 0
      *  @return Возвращает элемент под номер строки i и колонки j, для его изменения
      * */
-    double& operator()(size_t i, size_t j) noexcept {
+    double& operator()(size_t i, size_t j) {
         if (((i >= rows) || (j >= cols)))
-            return 0;
-            // throw OutOfRange(i, j, *this);
+            // return  nullptr;
+             throw; // OutOfRange(i, j, *this);
         return (double &) matrix[(j + (i * cols))];
     }
 
@@ -188,7 +192,7 @@ public:
      * */
     Matrix operator+(const Matrix &rhs) const noexcept {
         if (((rows != rhs.rows) || (cols != rhs.cols)))
-            return nullptr;
+            return Matrix(0, 0);
             // throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, cols);
         for (size_t i = 0, size = (rows * cols); i < size; ++i)
@@ -202,7 +206,7 @@ public:
      * */
     Matrix operator-(const Matrix &rhs) const noexcept {
         if (((rows != rhs.rows) || (cols != rhs.cols)))
-            return nullptr;
+            return Matrix(0, 0);
             // throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, cols);
         for (size_t i = 0, size = (rows * cols); i < size; ++i)
@@ -216,7 +220,7 @@ public:
      * */
     Matrix operator*(const Matrix &rhs) const noexcept {
         if (cols != rhs.rows)
-            return nullptr;
+            return Matrix(0, 0);
             // throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, rhs.cols);
         for (size_t i = 0; i < rows; ++i)
@@ -308,7 +312,7 @@ public:
      * */
     Matrix adj() const noexcept {
         if (this->det() == 0)
-            return nullptr;
+            return Matrix(0, 0);
             // throw SingularMatrix();
 
         Matrix adj_matrix(rows, cols);
@@ -325,16 +329,19 @@ public:
      * */
     Matrix inv() const noexcept {
         if (cols != rows)
-            return nullptr;
+            return Matrix(0, 0);
             // throw DimensionMismatch(*this);
         
         double determinant = this->det();
         if (determinant == 0)
-            return nullptr;
+            return Matrix(0, 0);
             // throw SingularMatrix();
 
         return (this->adj() * (1 / determinant));
     }
+
+    /** @brief Метод Гаусса
+     * */
 
     /** @} */ // Конец группы: Дополнительные операции над матрицами
 
@@ -343,20 +350,107 @@ public:
      *  @{
      */
 
+public:
+    /** @brief Нормировка строки
+     *  @param r Номер строки
+     *  @param elem Элемент на который делем строку
+     * */
+    void rationingRow(size_t r, double elem) {
+        if ((rows <= 0) || (r >= rows))
+            return;
+        for (size_t j = 0; j < cols; ++j)
+            matrix[(j + (r * cols))] /= elem;
+    }
+
+    /** @brief Нормировка колонки
+     *  @param r Номер колонки
+     *  @param elem Элемент на который делем строку
+     * */
+    void rationingCol(size_t c, double elem) {
+        if ((cols <= 0) || (c >= cols))
+            return;
+        for (size_t i = 0; i < rows; ++i)
+            matrix[(c + (i * cols))] /= elem;
+    }
+
+    /** @brief Вычесть из одной строки другую
+     *  @param from_i Из этой строки
+     *  @param i Вычесть эту строку
+     * */
+    void minusRowRow(size_t from_i, size_t i) {
+        // TODO: Чтобы они проверялись
+        for (size_t j = 0; j < cols; ++j) {
+            matrix[(j + (from_i * cols))] -= matrix[(j + (i * cols))];
+        }
+    }
+public:
+    /** @brief Получение расширенной матрицы системы
+     *  @param A
+     *  @param B
+     * */
+    Matrix getExtendedMatrixOfTheSystem(Matrix B) const {
+        if (isNull() || B.isNull())
+            return Matrix(0, 0);
+        if (rows != B.rows)
+            return Matrix(0, 0);
+
+        Matrix AB(rows, (cols + B.cols));
+        for (size_t i = 0; i < AB.rows; ++i)
+            for (size_t j = 0, ja = 0; j < cols; ++j, ++ja)
+                AB(i, j) = matrix[(ja + (i * cols))];
+        for (size_t i = 0; i < AB.rows; ++i)
+            for (size_t j = cols, jb = 0; j < AB.cols; ++j, ++jb)
+                AB(i, j) = B(i, jb);
+        return AB;
+    }
+
+    /** @brief Метод Гаусса
+     *  @param A Матрица системы
+     *  @param B Расширение для матрицы системы
+     * */
+    friend Matrix SLEmethodGauss(Matrix A, Matrix B);
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
 
-std::ostream& operator<<(std::ostream &os, const Matrix &matrix) {
+std::ostream& operator<<(std::ostream &os, const Matrix &matrix) noexcept {
     os << matrix.rows << ' ' << matrix.cols << '\n';
-    for (size_t i = 0, size = (matrix.rows * matrix.cols); i < size; ++i)
-        os << std::setprecision(std::numeric_limits<double>::max_digits10) << matrix.matrix[i] << ' ';
-    os << '\n';
+    for (size_t i = 0; i < matrix.rows; ++i, os << '\n')
+        for (size_t j = 0; j < matrix.cols; ++j)
+            os << std::setprecision(std::numeric_limits<double>::max_digits10) << matrix.matrix[(j + (i * matrix.cols))] << ' ';
     return os;
 }
 
-Matrix operator*(double val, const Matrix &matrix) {
+Matrix operator*(double val, const Matrix &matrix) noexcept {
     return (matrix * val);
 }
+
+Matrix SLEmethodGauss(Matrix A, Matrix B) {
+    if (A.det() == 0)
+        Matrix(0, 0);
+
+    Matrix AB = A.getExtendedMatrixOfTheSystem(B);
+    if (AB.isNull())
+        return Matrix(0, 0);
+
+    for (size_t i = 0; i < AB.getRows(); ++i) {
+        for (size_t j = i; j < AB.getRows(); ++j) {
+            AB.rationingRow(j, AB(j, i));
+        }
+        for (size_t j = (i + 1); j < AB.getRows(); ++j) {
+            AB.minusRowRow(j, i);
+        }
+    }
+
+    Matrix x(AB.getRows(), 1);
+    for (size_t i = (x.getRows() - 1), k = (AB.getCols() - 2); ((i < x.getRows()) && (k < AB.getCols())); --i, --k) {
+        x(i, 0) = AB(i, (AB.getCols() - 1));
+        for (size_t j = (i - 1); j < x.getRows(); --j) {
+            AB(j, (AB.getCols() - 1)) -= (AB(j, k) * x(i, 0));
+        }
+    }
+
+    return x;
+} 
 
 #endif  // _MATRIX_H_
 
