@@ -5,25 +5,24 @@
 
 #include "matrix.h"
 
-namespace prep {
 class MatrixException : public std::exception {
- public:
+public:
     explicit MatrixException(const std::string &msg) : m_msg(msg) {}
-    const char *what()
-    const noexcept override {
+    const char *what() const noexcept override {
         return m_msg.c_str();
     }
- private:
+
+private:
     std::string m_msg;
 };
 
 class InvalidMatrixStream : public MatrixException {
- public:
+public:
     InvalidMatrixStream() : MatrixException("Error occurred while reading from stream") {}
 };
 
 class OutOfRange : public MatrixException {
- public:
+public:
     OutOfRange(size_t i, size_t j, const Matrix &matrix) : MatrixException(
                 "Indexes (" + std::to_string(i) + ", " + std::to_string(j) +
                 ") are out of range. Matrix size is [" +
@@ -31,7 +30,7 @@ class OutOfRange : public MatrixException {
 };
 
 class DimensionMismatch : public MatrixException {
- public:
+public:
     DimensionMismatch(const Matrix &m1, const Matrix &m2) : MatrixException(
                     "M1[" + std::to_string(m1.getRows()) + ", " + std::to_string(m1.getCols()) + "] and M2[" +
                     std::to_string(m2.getRows()) + ", " + std::to_string(m2.getCols()) +
@@ -43,7 +42,8 @@ class DimensionMismatch : public MatrixException {
 };
 
 class SingularMatrix : public MatrixException {
- public:
+public:
     SingularMatrix() : MatrixException("Singular matrix") {}
 };
-}  // namespace prep
+
+
