@@ -56,6 +56,7 @@ public:
         rows = cols = 0;
         if (!(is >> rows >> cols)) {
             return;
+            //throw InvalidMatrixStream();
         } else {
             matrix = new double[(rows * cols)];
             for (size_t i = 0; i < rows; ++i) {
@@ -416,7 +417,8 @@ std::ostream& operator<<(std::ostream &os, const Matrix &matrix) noexcept {
     os << matrix.rows << ' ' << matrix.cols << '\n';
     for (size_t i = 0; i < matrix.rows; ++i, os << '\n')
         for (size_t j = 0; j < matrix.cols; ++j)
-            os << std::setprecision(std::numeric_limits<double>::max_digits10) << matrix.matrix[(j + (i * matrix.cols))] << ' ';
+            os << /*std::setprecision(std::numeric_limits<double>::max_digits10) <<*/
+                 (round(matrix.matrix[(j + (i * matrix.cols))] * 10000) / 10000) << ' ';
     return os;
 }
 
