@@ -23,7 +23,7 @@ private:
      *  @param x позиция элемента
      *  @return Знак матрицы матрицы знаков
      * */
-    static int sign(size_t x) {
+    static int sign(const size_t &x) {
         return (((x % 2) == 0) ? 1 : -1);
     }
 public:
@@ -48,31 +48,26 @@ public:
      *         1 2 3
      *         4 5 6
      *         7 8 9
-     *         Где 1 строка это rows x cols, считается по умолчанию, что они >= 0, последующие данные
-     *  @param is Поток данных это может быть как поток из файла, так и из терминала,
-     *            если равен nullptr то матрица rows(0) x cols(0).
+     *         Где 1 строка это rows x cols
+     *  @param is Поток данных это может быть как поток из файла
+     *  @exception InvalidMatrixStream() Ошибка чтения из потока
      * */
-    explicit Matrix(std::istream &is) noexcept {
+    explicit Matrix(std::istream &is) {
         rows = cols = 0;
-        if (!(is >> rows >> cols)) {
-            return;
-            //throw InvalidMatrixStream();
-        } else {
-            matrix = new double[(rows * cols)];
-            for (size_t i = 0; i < rows; ++i) {
-                for (size_t j = 0; j < cols; ++j) {
-                    if (!(is >> matrix[(j + (i * cols))])) {
-                        delete []matrix;
-                        rows = cols = 0;
-                        return;
-                    }
+        if (!(is >> rows >> cols))
+            throw InvalidMatrixStream();
+
+        matrix = new double[(rows * cols)];
+        for (size_t i = 0; i < rows; ++i)
+            for (size_t j = 0; j < cols; ++j)
+                if (!(is >> matrix[(j + (i * cols))])) {
+                    delete []matrix;
+                    throw InvalidMatrixStream();
                 }
-            }
-        }
     }
 
     /** @brief Конструктор копирования
-     *  @param rhs Другая матрица, если равна nullptr, то тогда матрица 0x0
+     *  @param rhs Другая матрица
      * */
     Matrix(Matrix &rhs) noexcept {
         rows = rhs.getRows();
@@ -84,12 +79,12 @@ public:
     }
 
     /** @brief Оператор присваивания
-     *  @param rhs Другая матрица, если равна nullptr, то тогда матрица 0x0
+     *  @param rhs Другая матрица
      *  @return Возвращает присвоенную матрицу
      * */
     Matrix &operator=(const Matrix &rhs) noexcept {
         if (&rhs != this) {
-            delete[] matrix;
+            delete []matrix;
             rows = rhs.getRows();
             cols = rhs.getCols();
             matrix = new double[(rows * cols)];
@@ -137,11 +132,11 @@ public:
      *  @param i номер строки, если не входит в границы, вернуть 0
      *  @param j номер колонки, если не входит в границы, вернуть 0
      *  @return Возвращает элемент под номер строки i и колонки j
+     *  @exception OutOfRange() Выход за пределы матрицы
      * */
-    double operator()(size_t i, size_t j) const noexcept {
+    double operator()(size_t i, size_t j) const {
         if (((i >= rows) || (j >= cols)))
-            return 0.0;
-            // throw OutOfRange(i, j, *this);
+            throw OutOfRange(i, j, *this);
         return matrix[(j + (i * cols))];
     }
 
@@ -150,11 +145,11 @@ public:
      *  @param i номер строки, если не входит в границы, вернуть 0
      *  @param j номер колонки, если не входит в границы, вернуть 0
      *  @return Возвращает элемент под номер строки i и колонки j, для его изменения
+     *  @exception OutOfRange() Выход за пределы матрицы
      * */
     double& operator()(size_t i, size_t j) {
         if (((i >= rows) || (j >= cols)))
-            // return  nullptr;
-             throw; // OutOfRange(i, j, *this);
+             throw OutOfRange(i, j, *this);
         return (double &) matrix[(j + (i * cols))];
     }
 
@@ -190,11 +185,11 @@ public:
     /** @brief Операция сложения матриц
      *  @param rhs Матрица
      *  @return Результат сложения матриц, если не возможно вернуть nullptr
+     *  @exception DimensionMismatch() Несовместимость матриц
      * */
-    Matrix operator+(const Matrix &rhs) const noexcept {
+    Matrix operator+(const Matrix &rhs) const {
         if (((rows != rhs.rows) || (cols != rhs.cols)))
-            return Matrix(0, 0);
-            // throw DimensionMismatch(*this, rhs);
+            throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, cols);
         for (size_t i = 0, size = (rows * cols); i < size; ++i)
             new_matrix.matrix[i] = (matrix[i] + rhs.matrix[i]);
@@ -204,11 +199,11 @@ public:
     /** @brief Операция вычитания матриц
      *  @param rhs Матрица
      *  @return Разницу матриц, если не возможно вернуть nullptr
+     *  @exception DimensionMismatch() Несовместимость матриц
      * */
-    Matrix operator-(const Matrix &rhs) const noexcept {
+    Matrix operator-(const Matrix &rhs) const {
         if (((rows != rhs.rows) || (cols != rhs.cols)))
-            return Matrix(0, 0);
-            // throw DimensionMismatch(*this, rhs);
+            throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, cols);
         for (size_t i = 0, size = (rows * cols); i < size; ++i)
             new_matrix.matrix[i] = (matrix[i] - rhs.matrix[i]);
@@ -218,11 +213,11 @@ public:
     /** @brief Операция умножения матриц
      *  @param rhs Матрица
      *  @return Умноженные матрицы, если не возможно вернуть nullptr
+     *  @exception DimensionMismatch() Несовместимость матриц
      * */
-    Matrix operator*(const Matrix &rhs) const noexcept {
+    Matrix operator*(const Matrix &rhs) const {
         if (cols != rhs.rows)
-            return Matrix(0, 0);
-            // throw DimensionMismatch(*this, rhs);
+            throw DimensionMismatch(*this, rhs);
         Matrix new_matrix(rows, rhs.cols);
         for (size_t i = 0; i < rows; ++i)
             for (size_t j = 0; j < rhs.cols; ++j)
@@ -287,12 +282,12 @@ public:
     }
 
     /** @brief Вычисление определителя матрицы
-     *  @return Возвращает определитель матрицы, считать, что берем всегда у квадратной, в противном случае 0
+     *  @return Возвращает определитель матрицы
+     *  @exception DimensionMismatch() Не квадратная матрица
      * */
-    double det() const noexcept {
+    double det() const {
         if (cols != rows)
-            return std::numeric_limits<double>::min();
-            // throw DimensionMismatch(*this);
+            throw DimensionMismatch(*this);
 
         if ((rows == 1))
             return matrix[0];
@@ -309,12 +304,16 @@ public:
     }
     
     /** @brief Получает присоединенную матрицу
-     *  @return Возвращает присоединенную матрицу, если нельзя взять, вернуть nullptr
+     *  @return Возвращает присоединенную матрицу
+     *  @exception DimensionMismatch() Не квадратная матрица
+     *  @exception SingularMatrix() Определитель равен ноль
      * */
-    Matrix adj() const noexcept {
+    Matrix adj() const {
+        if (cols != rows)
+            throw DimensionMismatch(*this);
+
         if (this->det() == 0)
-            return Matrix(0, 0);
-            // throw SingularMatrix();
+            throw SingularMatrix();
 
         Matrix adj_matrix(rows, cols);
         Matrix transp_matrix = this->transp();
@@ -326,17 +325,17 @@ public:
     }
 
     /** @brief Обратная матрица
-     *  @return Возвращает обратную матрицу, если нельзя взять, вернуть nullptr
+     *  @return Возвращает обратную матрицу
+     *  @exception DimensionMismatch() Не квадратная матрица
+     *  @exception SingularMatrix() Определитель равен ноль
      * */
-    Matrix inv() const noexcept {
+    Matrix inv() const {
         if (cols != rows)
-            return Matrix(0, 0);
-            // throw DimensionMismatch(*this);
+            throw DimensionMismatch(*this);
         
         double determinant = this->det();
         if (determinant == 0)
-            return Matrix(0, 0);
-            // throw SingularMatrix();
+            throw SingularMatrix();
 
         return (this->adj() * (1 / determinant));
     }
