@@ -2,20 +2,23 @@
 # Сборщик проекта
 ################################################################################
 
-#C_SRCS += \
-./project/main.cpp
+C_SRCS += \
+./project/matrix/exceptions.cpp \
+./project/matrix/matrix.cpp
 
-#C_DEPS += \
-./project/main.d
+C_DEPS += \
+./project/matrix/exceptions.d \
+./project/matrix/matrix.d
 
-#OBJS += \
-./project/main.o 
+OBJS += \
+./project/matrix/exceptions.o \
+./project/matrix/matrix.o
 
-#project/%.o: ./project/%.cpp
-#	@echo 'Цель построения: $<'
-#	@echo 'Операция: Compiler'
-#	g++ -Wall -Wextra -Werror -ansi -std=c++17 -O3 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
-#	@echo 'Цель готового здания: $<'
-#	@echo ' '
+project/matrix/%.o: ./project/matrix/%.cpp
+	@echo 'Цель построения: $<'
+	@echo 'Операция: Compiler'
+	g++ -Wall -Wextra -Werror -ansi -std=c++17 -O3 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	@echo 'Цель готового здания: $<'
+	@echo ' '
 
 
