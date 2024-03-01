@@ -6,7 +6,7 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
-//#include <stdexcept>
+#include <stdexcept>
 
 /* @class Matrix класс матрицы двумерной. Различные операции для расчетов
  * @param rows Строки
