@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <cmath>
 #include <limits>
+#include <iostream>
+#include <numbers>
 #include <stdexcept>
 
 /* @class Matrix класс матрицы двумерной. Различные операции для расчетов
@@ -50,7 +52,7 @@ public:
     /** @brief Конструктор копирования
      *  @param rhs Другая матрица
      * */
-    Matrix(Matrix &rhs) noexcept;
+    Matrix(const Matrix &rhs) noexcept;
 
     /** @brief Оператор присваивания
      *  @param rhs Другая матрица

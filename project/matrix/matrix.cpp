@@ -1,9 +1,14 @@
 #include "./matrix.h"
 #include "./exceptions.h"
 
+
 int Matrix::sign(size_t x) const {
 	return (((x % 2) == 0) ? 1 : -1);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////                    Base matrix operation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Matrix::Matrix(const size_t &_rows, const size_t &_cols) noexcept : rows(_rows), cols(_cols) {
     matrix = new double[(rows * cols)];
@@ -25,7 +30,7 @@ Matrix::Matrix(std::istream &is) {
             }
 }
 
-Matrix::Matrix(Matrix &rhs) noexcept {
+Matrix::Matrix(const Matrix &rhs) noexcept {
 	rows = rhs.getRows();
     cols = rhs.getCols();
 	matrix = new double[(rows * cols)];
@@ -56,8 +61,12 @@ std::ostream& operator<<(std::ostream &os, const Matrix &matrix) noexcept {
     os << matrix.rows << ' ' << matrix.cols << '\n';
     for (size_t i = 0; i < matrix.rows; ++i, os << '\n')
         for (size_t j = 0; j < matrix.cols; ++j)
-            os << /*std::setprecision(std::numeric_limits<double>::max_digits10) <<*/
-                 (round(matrix.matrix[(j + (i * matrix.cols))] * 10000) / 10000) << ' ';
+#if 1
+            os << std::setprecision(std::numeric_limits<double>::max_digits10) 
+               << matrix.matrix[(j + (i * matrix.cols))] << ' ';
+#else
+            os << (round(matrix.matrix[(j + (i * matrix.cols))] * 10000) / 10000) << ' ';
+#endif
     return os;
 }
 
@@ -84,6 +93,10 @@ double &Matrix::operator()(size_t i, size_t j) {
          throw OutOfRange(i, j, *this);
 	return (double &) matrix[(j + (i * cols))];
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////                    Math operation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Matrix::operator==(const Matrix &rhs) const noexcept {
 	if (((rows != rhs.rows) || (cols != rhs.cols)))
@@ -141,6 +154,10 @@ Matrix Matrix::operator*(double val) const noexcept {
 Matrix operator*(double val, const Matrix &matrix) noexcept {
     return (matrix * val);
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////                    Pro operation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Matrix Matrix::minor(size_t row, size_t col) const noexcept {
 	Matrix minor((rows - 1), (cols - 1));
