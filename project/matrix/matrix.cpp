@@ -172,7 +172,7 @@ Matrix Matrix::minor(size_t row, size_t col) const noexcept {
 }
 
 Matrix Matrix::transp() const noexcept {
-	Matrix tra_mtx( cols, rows);
+	Matrix tra_mtx(cols, rows);
     for (size_t i = 0; i < cols; ++i)
 		for (size_t j = 0; j < rows; ++j)
             tra_mtx.matrix[(j + (i * tra_mtx.cols))] = matrix[(i + (j * cols))];
