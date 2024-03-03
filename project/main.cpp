@@ -461,6 +461,35 @@ namespace TestMathBaseOperations {
         return false;
     }
 
+    /** @brief Тест умножения матрицы на число
+     * */
+    bool TestScalarMX() {
+        Matrix a = utils::genMatrix();
+        Matrix b = a;
+        const double coef = utils::genDouble();
+        Matrix x = (a * coef);
+        for (size_t i = 0; i < b.getRows(); ++i) {
+            for (size_t j = 0; j < b.getCols(); ++j) {
+                b(i, j) *= coef;
+            }
+        }
+        return (x == b);
+    }
+
+    /** @brief Тест умножения матрицы на число
+     * */
+    bool TestScalarXM() {
+        Matrix a = utils::genMatrix();
+        Matrix b = a;
+        const double coef = utils::genDouble();
+        Matrix x = (coef * a);
+        for (size_t i = 0; i < b.getRows(); ++i) {
+            for (size_t j = 0; j < b.getCols(); ++j) {
+                b(i, j) *= coef;
+            }
+        }
+        return (x == b);
+    }
 };
 
 //// pro opration
@@ -505,6 +534,8 @@ int main() {
                                                     TestMathBaseOperations::FN_B_SCA_01,
                                                     TestMathBaseOperations::FN_X_SCA_01) << std::endl;
     std::cout << TestMathBaseOperations::TestErrorScalar() << std::endl;
+    std::cout << TestMathBaseOperations::TestScalarMX() << std::endl;
+    std::cout << TestMathBaseOperations::TestScalarXM() << std::endl;
 #endif
 
 #if 0
