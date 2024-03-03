@@ -1,7 +1,7 @@
 #include "./matrix/test/test.h"
 
 int main() {
-#if 0
+#if 1
 	Matrix A(4, 4);
 
 	A(0, 0) = 1; A(0, 1) = 2; A(0, 2) = 3; A(0, 3) = 4;
@@ -15,7 +15,7 @@ int main() {
 
 	std::cout << x.transp() << std::endl;
 #endif
-    matrixtest::make();
+    //matrixtest::make();
 	return 0;
 }
 
