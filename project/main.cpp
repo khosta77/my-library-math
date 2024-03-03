@@ -24,6 +24,7 @@ namespace utils {
     double genDouble(double from = MIN_VAL, double to = MAX_VAL);
     size_t genSizeT(size_t from = 0, size_t to = MAX_SIZE);
     Matrix genMatrix(size_t rows = 0, size_t cols = 0);
+    Matrix readFromFile(const std::string &fn);
 
     static std::random_device engine;
 
@@ -111,6 +112,14 @@ namespace utils {
 
         return matrix;
     }
+
+    Matrix readFromFile(const std::string &fn) {
+        std::ifstream in(fn.c_str(), (std::ios_base::in));
+        Matrix matrix(in);
+        in.close();
+        return matrix;
+    }
+
 
 };
 
@@ -346,10 +355,112 @@ namespace TestMathBaseOperations {
         const Matrix M2 = utils::genMatrix();
         return ((M1 != M2) ? true : false);
     }
+    const std::string FN_PATH = "./project/matrix/data/math_base_operation/matrix_";
+
+    //// SUM
+    const std::string FN_A_SUM_00 = (FN_PATH + "sum/case_a_00.txt");
+    const std::string FN_B_SUM_00 = (FN_PATH + "sum/case_b_00.txt");
+    const std::string FN_X_SUM_00 = (FN_PATH + "sum/case_x_00.txt");
     
+    //// SUB
+    const std::string FN_A_SUB_00 = (FN_PATH + "sub/case_a_00.txt");
+    const std::string FN_B_SUB_00 = (FN_PATH + "sub/case_b_00.txt");
+    const std::string FN_X_SUB_00 = (FN_PATH + "sub/case_x_00.txt");
+  
+    //// SCALAR
+    const std::string FN_A_SCA_00 = (FN_PATH + "scalar/case_a_00.txt");
+    const std::string FN_B_SCA_00 = (FN_PATH + "scalar/case_b_00.txt");
+    const std::string FN_B_SCA_01 = (FN_PATH + "scalar/case_b_01.txt");
+    const std::string FN_X_SCA_00 = (FN_PATH + "scalar/case_x_00.txt");
+    const std::string FN_X_SCA_01 = (FN_PATH + "scalar/case_x_01.txt");
+
+    /** @brief Тест оператора +
+     * */
     bool TestSum(const std::string &A, const std::string &B, const std::string &X) {
-        
+        const Matrix a = utils::readFromFile(A);
+        const Matrix b = utils::readFromFile(B);
+        const Matrix x = utils::readFromFile(X);
+        Matrix sum;
+        try {
+            sum = (a + b);
+        } catch (...) {
+            return false;
+        }
+        return (sum == x);
     }
+
+    /** @brief Тест оператора +
+     * */
+    bool TestErrorSum() {
+        const Matrix a = utils::genMatrix();
+        const Matrix b = utils::genMatrix((a.getRows() + utils::genSizeT(1)), a.getCols());
+        Matrix sum;
+        try {
+            sum = (a + b);
+        } catch (const DimensionMismatch &eDM) {
+            return true;
+        } catch (...) {}
+        return false;
+    }
+
+    /** @brief Тест оператора -
+     * */
+    bool TestSub(const std::string &A, const std::string &B, const std::string &X) {
+        const Matrix a = utils::readFromFile(A);
+        const Matrix b = utils::readFromFile(B);
+        const Matrix x = utils::readFromFile(X);
+        Matrix sub;
+        try {
+            sub = (a - b);
+        } catch (...) {
+            return false;
+        }
+        return (sub == x);
+    }
+
+    /** @brief Тест оператора -
+     * */
+    bool TestErrorSub() {
+        const Matrix a = utils::genMatrix();
+        const Matrix b = utils::genMatrix((a.getRows() + utils::genSizeT(1)), a.getCols());
+        Matrix sub;
+        try {
+            sub = (a - b);
+        } catch (const DimensionMismatch &eDM) {
+            return true;
+        } catch (...) {}
+        return false;
+    }
+
+    /** @brief Тест оператора M * M
+     * */
+    bool TestScalar(const std::string &A, const std::string &B, const std::string &X) {
+        const Matrix a = utils::readFromFile(A);
+        const Matrix b = utils::readFromFile(B);
+        const Matrix x = utils::readFromFile(X);
+        Matrix scalar;
+        try {
+            scalar = (a * b);
+        } catch (...) {
+            return false;
+        }
+        return (scalar == x);
+    }
+
+    /** @brief Тест оператора M * M
+     * */
+    bool TestErrorScalar() {
+        const Matrix a = utils::genMatrix();
+        const Matrix b = utils::genMatrix((a.getCols() + utils::genSizeT(1)), a.getRows());
+        Matrix scalar;
+        try {
+            scalar = (a * b);
+        } catch (const DimensionMismatch &eDM) {
+            return true;
+        } catch (...) {}
+        return false;
+    }
+
 };
 
 //// pro opration
@@ -379,7 +490,21 @@ int main() {
     std::cout << TestMathBaseOperations::TestEqualNo() << std::endl;
     std::cout << TestMathBaseOperations::TestNoEqualYes() << std::endl;
     std::cout << TestMathBaseOperations::TestNoEqualNo() << std::endl;
-
+    std::cout << TestMathBaseOperations::TestSum(TestMathBaseOperations::FN_A_SUM_00,
+                                                 TestMathBaseOperations::FN_B_SUM_00,
+                                                 TestMathBaseOperations::FN_X_SUM_00) << std::endl;
+    std::cout << TestMathBaseOperations::TestErrorSum() << std::endl;
+    std::cout << TestMathBaseOperations::TestSub(TestMathBaseOperations::FN_A_SUB_00,
+                                                 TestMathBaseOperations::FN_B_SUB_00,
+                                                 TestMathBaseOperations::FN_X_SUB_00) << std::endl;
+    std::cout << TestMathBaseOperations::TestErrorSub() << std::endl;
+    std::cout << TestMathBaseOperations::TestScalar(TestMathBaseOperations::FN_A_SCA_00,
+                                                    TestMathBaseOperations::FN_B_SCA_00,
+                                                    TestMathBaseOperations::FN_X_SCA_00) << std::endl;
+    std::cout << TestMathBaseOperations::TestScalar(TestMathBaseOperations::FN_A_SCA_00,
+                                                    TestMathBaseOperations::FN_B_SCA_01,
+                                                    TestMathBaseOperations::FN_X_SCA_01) << std::endl;
+    std::cout << TestMathBaseOperations::TestErrorScalar() << std::endl;
 #endif
 
 #if 0
