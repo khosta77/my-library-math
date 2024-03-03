@@ -197,9 +197,6 @@ public:
      * */
     Matrix inv() const;
 
-    /** @brief Метод Гаусса
-     * */
-
     /** @} */ // Конец группы: Дополнительные операции над матрицами
 
     /** @defgroup Продвинутые операции над матрицами
@@ -207,7 +204,7 @@ public:
      *  @{
      */
 
-public:
+private:
     /** @brief Нормировка строки
      *  @param r Номер строки
      *  @param elem Элемент на который делем строку
@@ -225,19 +222,27 @@ public:
      *  @param i Вычесть эту строку
      * */
     void minusRowRow(size_t from_i, size_t i);
-public:
+
     /** @brief Получение расширенной матрицы системы
      *  @param A
      *  @param B
      * */
     Matrix getExtendedMatrixOfTheSystem(Matrix B) const;
 
+public:
     /** @brief Метод Гаусса
      *  @param A Матрица системы
      *  @param B Расширение для матрицы системы
+     *  @throw SingularMatrix Определитель матрицы равено 0
+     *  @throw DimensionMismatch Матрицы не совместимы
      * */
-    friend Matrix SLEmethodGauss(Matrix A, Matrix B);
+    friend Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
+
+std::ostream& operator<<(std::ostream& os, const Matrix& matrix) noexcept;
+Matrix operator*(double val, const Matrix &matrix) noexcept;
+Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
+
 
 #endif  // _MATRIX_H_

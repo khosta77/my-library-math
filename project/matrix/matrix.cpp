@@ -224,15 +224,19 @@ Matrix Matrix::inv() const {
     return (this->adj() * (1 / determinant));
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////                    Math high operation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Matrix::rationingRow(size_t r, double elem) {
-	if ((rows <= 0) || (r >= rows))
+	if (r >= rows)
         return;
 	for (size_t j = 0; j < cols; ++j)
         matrix[(j + (r * cols))] /= elem;
 }
 
 void Matrix::rationingCol(size_t c, double elem) {
-    if ((cols <= 0) || (c >= cols))
+    if (c >= cols)
 		return;
 	for (size_t i = 0; i < rows; ++i)
         matrix[(c + (i * cols))] /= elem;
@@ -246,11 +250,6 @@ void Matrix::minusRowRow(size_t from_i, size_t i) {
 }
 
 Matrix Matrix::getExtendedMatrixOfTheSystem(Matrix B) const {
-	if (isNull() || B.isNull())
-        return Matrix(0, 0);
-	if (rows != B.rows)
-        return Matrix(0, 0);
-
 	Matrix AB(rows, (cols + B.cols));
     for (size_t i = 0; i < AB.rows; ++i)
 		for (size_t j = 0, ja = 0; j < cols; ++j, ++ja)
@@ -262,31 +261,29 @@ Matrix Matrix::getExtendedMatrixOfTheSystem(Matrix B) const {
 }
 
 // friend
-Matrix SLEmethodGauss(Matrix A, Matrix B) {
+Matrix SLEmethodGauss(const Matrix& A, const Matrix& B) {
     if (A.det() == 0)
-        Matrix(0, 0);
+        throw SingularMatrix();
+	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull()))
+        throw DimensionMismatch(A, B);
 
     Matrix AB = A.getExtendedMatrixOfTheSystem(B);
-    if (AB.isNull())
-        return Matrix(0, 0);
 
-    for (size_t i = 0; i < AB.getRows(); ++i) {
-        for (size_t j = i; j < AB.getRows(); ++j) {
+    const size_t row = AB.getRows();
+    const size_t col = AB.getCols();
+    for (size_t i = 0; i < row; ++i) {
+        for (size_t j = i; j < row; ++j)
             AB.rationingRow(j, AB(j, i));
-        }
-        for (size_t j = (i + 1); j < AB.getRows(); ++j) {
+        for (size_t j = (i + 1); j < row; ++j)
             AB.minusRowRow(j, i);
-        }
     }
 
-    Matrix x(AB.getRows(), 1);
-    for (size_t i = (x.getRows() - 1), k = (AB.getCols() - 2); ((i < x.getRows()) && (k < AB.getCols())); --i, --k) {
-        x(i, 0) = AB(i, (AB.getCols() - 1));
-        for (size_t j = (i - 1); j < x.getRows(); --j) {
-            AB(j, (AB.getCols() - 1)) -= (AB(j, k) * x(i, 0));
-        }
+    Matrix x(row, 1);
+    for (size_t i = (row - 1), k = (col - 2); ((i < row) && (col)); --i, --k) {
+        x(i, 0) = AB(i, (col - 1));
+        for (size_t j = (i - 1); j < row; --j)
+            AB(j, (col - 1)) -= (AB(j, k) * x(i, 0));
     }
-
     return x;
 }
 
