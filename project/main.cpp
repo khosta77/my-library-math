@@ -326,7 +326,7 @@ namespace TestBaseOperations {
 namespace TestMathBaseOperations {
     /** @brief тест оператора ==
      * */
-    bool TestEqualYes() {
+    bool EqualYes() {
         const Matrix M1 = utils::genMatrix();
         const Matrix M2(M1);
         return ((M1 == M2) ? true : false);
@@ -334,7 +334,7 @@ namespace TestMathBaseOperations {
 
     /** @brief тест оператора ==
      * */
-    bool TestEqualNo() {
+    bool EqualNo() {
         const Matrix M1 = utils::genMatrix();
         const Matrix M2 = utils::genMatrix();
         return ((M1 == M2) ? false : true);
@@ -342,7 +342,7 @@ namespace TestMathBaseOperations {
 
     /** @brief тест оператора !=
      * */
-    bool TestNoEqualYes() {
+    bool NoEqualYes() {
         const Matrix M1 = utils::genMatrix();
         const Matrix M2(M1);
         return ((M1 != M2) ? false : true);
@@ -350,7 +350,7 @@ namespace TestMathBaseOperations {
 
     /** @brief тест оператора !=
      * */
-    bool TestNoEqualNo() {
+    bool NoEqualNo() {
         const Matrix M1 = utils::genMatrix();
         const Matrix M2 = utils::genMatrix();
         return ((M1 != M2) ? true : false);
@@ -376,7 +376,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора +
      * */
-    bool TestSum(const std::string &A, const std::string &B, const std::string &X) {
+    bool Sum(const std::string &A, const std::string &B, const std::string &X) {
         const Matrix a = utils::readFromFile(A);
         const Matrix b = utils::readFromFile(B);
         const Matrix x = utils::readFromFile(X);
@@ -391,7 +391,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора +
      * */
-    bool TestErrorSum() {
+    bool ErrorSum() {
         const Matrix a = utils::genMatrix();
         const Matrix b = utils::genMatrix((a.getRows() + utils::genSizeT(1)), a.getCols());
         Matrix sum;
@@ -405,7 +405,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора -
      * */
-    bool TestSub(const std::string &A, const std::string &B, const std::string &X) {
+    bool Sub(const std::string &A, const std::string &B, const std::string &X) {
         const Matrix a = utils::readFromFile(A);
         const Matrix b = utils::readFromFile(B);
         const Matrix x = utils::readFromFile(X);
@@ -420,7 +420,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора -
      * */
-    bool TestErrorSub() {
+    bool ErrorSub() {
         const Matrix a = utils::genMatrix();
         const Matrix b = utils::genMatrix((a.getRows() + utils::genSizeT(1)), a.getCols());
         Matrix sub;
@@ -434,7 +434,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора M * M
      * */
-    bool TestScalar(const std::string &A, const std::string &B, const std::string &X) {
+    bool Scalar(const std::string &A, const std::string &B, const std::string &X) {
         const Matrix a = utils::readFromFile(A);
         const Matrix b = utils::readFromFile(B);
         const Matrix x = utils::readFromFile(X);
@@ -449,7 +449,7 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест оператора M * M
      * */
-    bool TestErrorScalar() {
+    bool ErrorScalar() {
         const Matrix a = utils::genMatrix();
         const Matrix b = utils::genMatrix((a.getCols() + utils::genSizeT(1)), a.getRows());
         Matrix scalar;
@@ -463,11 +463,16 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест умножения матрицы на число
      * */
-    bool TestScalarMX() {
+    bool ScalarMX() {
         Matrix a = utils::genMatrix();
         Matrix b = a;
         const double coef = utils::genDouble();
-        Matrix x = (a * coef);
+        Matrix x;
+        try {
+            x = (a * coef);
+        } catch (...) {
+            return false;
+        }
         for (size_t i = 0; i < b.getRows(); ++i) {
             for (size_t j = 0; j < b.getCols(); ++j) {
                 b(i, j) *= coef;
@@ -478,11 +483,16 @@ namespace TestMathBaseOperations {
 
     /** @brief Тест умножения матрицы на число
      * */
-    bool TestScalarXM() {
+    bool ScalarXM() {
         Matrix a = utils::genMatrix();
         Matrix b = a;
         const double coef = utils::genDouble();
-        Matrix x = (coef * a);
+        Matrix x;
+        try {
+            x = (a * coef);
+        } catch (...) {
+            return false;
+        }
         for (size_t i = 0; i < b.getRows(); ++i) {
             for (size_t j = 0; j < b.getCols(); ++j) {
                 b(i, j) *= coef;
@@ -493,6 +503,33 @@ namespace TestMathBaseOperations {
 };
 
 //// pro opration
+
+namespace TestMathProOperations {
+    //// TODO придумать тест для проверки минора
+
+    bool Transp() {
+        const Matrix a = utils::genMatrix();
+        Matrix b;
+        try {
+            b = a.transp();
+        } catch (...) {
+            return false;
+        }
+
+        if ((a.getRows() != b.getCols()) || (a.getCols() != b.getRows()))
+            return false;
+        
+        for (size_t i = 0; i < b.getRows(); ++i)
+            for (size_t j = 0; j < b.getCols(); ++j)
+                if (a(j, i) != b(i, j))
+                    return false;
+        return true;
+    }
+
+    bool Det() {
+        
+    }
+};
 
 //// SLE
 
@@ -514,30 +551,34 @@ int main() {
     std::cout << TestBaseOperations::CheckingFlow() << std::endl;
 #endif
 
-#if 1
-    std::cout << TestMathBaseOperations::TestEqualYes() << std::endl;
-    std::cout << TestMathBaseOperations::TestEqualNo() << std::endl;
-    std::cout << TestMathBaseOperations::TestNoEqualYes() << std::endl;
-    std::cout << TestMathBaseOperations::TestNoEqualNo() << std::endl;
-    std::cout << TestMathBaseOperations::TestSum(TestMathBaseOperations::FN_A_SUM_00,
-                                                 TestMathBaseOperations::FN_B_SUM_00,
-                                                 TestMathBaseOperations::FN_X_SUM_00) << std::endl;
-    std::cout << TestMathBaseOperations::TestErrorSum() << std::endl;
-    std::cout << TestMathBaseOperations::TestSub(TestMathBaseOperations::FN_A_SUB_00,
-                                                 TestMathBaseOperations::FN_B_SUB_00,
-                                                 TestMathBaseOperations::FN_X_SUB_00) << std::endl;
-    std::cout << TestMathBaseOperations::TestErrorSub() << std::endl;
-    std::cout << TestMathBaseOperations::TestScalar(TestMathBaseOperations::FN_A_SCA_00,
-                                                    TestMathBaseOperations::FN_B_SCA_00,
-                                                    TestMathBaseOperations::FN_X_SCA_00) << std::endl;
-    std::cout << TestMathBaseOperations::TestScalar(TestMathBaseOperations::FN_A_SCA_00,
-                                                    TestMathBaseOperations::FN_B_SCA_01,
-                                                    TestMathBaseOperations::FN_X_SCA_01) << std::endl;
-    std::cout << TestMathBaseOperations::TestErrorScalar() << std::endl;
-    std::cout << TestMathBaseOperations::TestScalarMX() << std::endl;
-    std::cout << TestMathBaseOperations::TestScalarXM() << std::endl;
+#if 0
+    std::cout << TestMathBaseOperations::EqualYes() << std::endl;
+    std::cout << TestMathBaseOperations::EqualNo() << std::endl;
+    std::cout << TestMathBaseOperations::NoEqualYes() << std::endl;
+    std::cout << TestMathBaseOperations::NoEqualNo() << std::endl;
+    std::cout << TestMathBaseOperations::Sum(TestMathBaseOperations::FN_A_SUM_00,
+                                             TestMathBaseOperations::FN_B_SUM_00,
+                                             TestMathBaseOperations::FN_X_SUM_00) << std::endl;
+    std::cout << TestMathBaseOperations::ErrorSum() << std::endl;
+    std::cout << TestMathBaseOperations::Sub(TestMathBaseOperations::FN_A_SUB_00,
+                                             TestMathBaseOperations::FN_B_SUB_00,
+                                             TestMathBaseOperations::FN_X_SUB_00) << std::endl;
+    std::cout << TestMathBaseOperations::ErrorSub() << std::endl;
+    std::cout << TestMathBaseOperations::Scalar(TestMathBaseOperations::FN_A_SCA_00,
+                                                TestMathBaseOperations::FN_B_SCA_00,
+                                                TestMathBaseOperations::FN_X_SCA_00) << std::endl;
+    std::cout << TestMathBaseOperations::Scalar(TestMathBaseOperations::FN_A_SCA_00,
+                                                TestMathBaseOperations::FN_B_SCA_01,
+                                                TestMathBaseOperations::FN_X_SCA_01) << std::endl;
+    std::cout << TestMathBaseOperations::ErrorScalar() << std::endl;
+    std::cout << TestMathBaseOperations::ScalarMX() << std::endl;
+    std::cout << TestMathBaseOperations::ScalarXM() << std::endl;
 #endif
 
+#if 1
+    std::cout << TestMathProOperations::Transp() << std::endl;
+
+#endif
 #if 0
 	Matrix A(4, 4);
 
