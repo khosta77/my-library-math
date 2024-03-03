@@ -526,9 +526,91 @@ namespace TestMathProOperations {
         return true;
     }
 
-    bool Det() {
-        
+    const std::string FN_PATH = "./project/matrix/data/math_pro_operation/matrix_";
+
+    //// Det
+    const std::string FN_DET_IN__00 = (FN_PATH + "det/case_0/in.txt");
+    const std::string FN_DET_OUT_00 = (FN_PATH + "det/case_0/out.txt");
+    const std::string FN_DET_IN__01 = (FN_PATH + "det/case_1/in.txt");
+    const std::string FN_DET_OUT_01 = (FN_PATH + "det/case_1/out.txt");
+    const std::string FN_DET_IN__02 = (FN_PATH + "det/case_2/in.txt");
+    const std::string FN_DET_OUT_02 = "";
+
+
+    bool Det(const std::string &m, const std::string &d = "") {
+        const Matrix a = utils::readFromFile(m);
+        double x = 0.0;
+        try {
+            x = a.det();
+        } catch (const DimensionMismatch &eDM) {
+            return ((d.empty()) ? true : false);
+        } catch (...) {
+            return false;
+        }
+        std::ifstream in(d.c_str(), (std::ios_base::in));
+        double control = 0.0;
+        in >> control;
+        in.close();
+
+        return (std::abs(x - control) < 1e-7);
     }
+
+    const std::string FN_ADJ_IN__00 = (FN_PATH + "adj/case_0/in.txt");
+    const std::string FN_ADJ_OUT_00 = (FN_PATH + "adj/case_0/out.txt");
+    const std::string FN_ADJ_IN__01 = (FN_PATH + "adj/case_1/in.txt");
+    const std::string FN_ADJ_OUT_01 = (FN_PATH + "adj/case_1/out.txt");
+    const std::string FN_ADJ_IN__02 = (FN_PATH + "adj/case_2/in.txt");
+    const std::string FN_ADJ_OUT_02 = (FN_PATH + "adj/case_2/out.txt");
+
+    bool Adj(const std::string &in, const std::string &out) {
+        const Matrix a = utils::readFromFile(in);
+        Matrix res;
+        try {
+            res = a.adj();
+        } catch (const DimensionMismatch &eDM) {
+            try {    a.det(); }
+            catch (const DimensionMismatch &eDM) {    return true; }
+            catch (...) {    return false; }
+            return false;
+        } catch (const SingularMatrix &eSM) {
+            double buffer = 0.0;
+            try {    buffer = a.det(); }
+            catch (const DimensionMismatch &eDM) {    return true; }
+            catch (...) {    return false; }
+            return ((std::abs(buffer - 0.0000000) < 1e-7) ? true : false);
+        } catch (...) {    return false;}
+        const Matrix b = utils::readFromFile(out);
+        return (res == b);
+    }
+
+    const std::string FN_INV_IN__00 = (FN_PATH + "inv/case_0/in.txt");
+    const std::string FN_INV_OUT_00 = (FN_PATH + "inv/case_0/out.txt");
+    const std::string FN_INV_IN__01 = (FN_PATH + "inv/case_1/in.txt");
+    const std::string FN_INV_OUT_01 = (FN_PATH + "inv/case_1/out.txt");
+    const std::string FN_INV_IN__02 = (FN_PATH + "inv/case_2/in.txt");
+    const std::string FN_INV_OUT_02 = (FN_PATH + "inv/case_2/out.txt");
+
+    bool Inv(const std::string &in, const std::string &out) {
+        const Matrix a = utils::readFromFile(in);
+        Matrix res;
+        try {
+            res = a.inv();
+        } catch (const DimensionMismatch &eDM) {
+            try {    a.det(); }
+            catch (const DimensionMismatch &eDM) {    return true; }
+            catch (...) {    return false; }
+            return false;
+        } catch (const SingularMatrix &eSM) {
+            double buffer = 0.0;
+            try {    buffer = a.det(); }
+            catch (const DimensionMismatch &eDM) {    return true; }
+            catch (...) {    return false; }
+            return ((std::abs(buffer - 0.0000000) < 1e-7) ? true : false);
+        } catch (...) {    return false;}
+        const Matrix b = utils::readFromFile(out);
+        return (res == b);
+    }
+
 };
 
 //// SLE
@@ -551,7 +633,7 @@ int main() {
     std::cout << TestBaseOperations::CheckingFlow() << std::endl;
 #endif
 
-#if 0
+#if 0  // TestMathBaseOperations
     std::cout << TestMathBaseOperations::EqualYes() << std::endl;
     std::cout << TestMathBaseOperations::EqualNo() << std::endl;
     std::cout << TestMathBaseOperations::NoEqualYes() << std::endl;
@@ -575,9 +657,26 @@ int main() {
     std::cout << TestMathBaseOperations::ScalarXM() << std::endl;
 #endif
 
-#if 1
+#if 1  // TestMathProOperations
     std::cout << TestMathProOperations::Transp() << std::endl;
-
+    std::cout << TestMathProOperations::Det(TestMathProOperations::FN_DET_IN__00,
+                                            TestMathProOperations::FN_DET_OUT_00) << std::endl;
+    std::cout << TestMathProOperations::Det(TestMathProOperations::FN_DET_IN__01,
+                                            TestMathProOperations::FN_DET_OUT_01) << std::endl;
+    std::cout << TestMathProOperations::Det(TestMathProOperations::FN_DET_IN__02,
+                                            TestMathProOperations::FN_DET_OUT_02) << std::endl;
+    std::cout << TestMathProOperations::Adj(TestMathProOperations::FN_ADJ_IN__00,
+                                            TestMathProOperations::FN_ADJ_OUT_00) << std::endl;
+    std::cout << TestMathProOperations::Adj(TestMathProOperations::FN_ADJ_IN__01,
+                                            TestMathProOperations::FN_ADJ_OUT_01) << std::endl;
+    std::cout << TestMathProOperations::Adj(TestMathProOperations::FN_ADJ_IN__02,
+                                            TestMathProOperations::FN_ADJ_OUT_02) << std::endl;
+    std::cout << TestMathProOperations::Inv(TestMathProOperations::FN_INV_IN__00,
+                                            TestMathProOperations::FN_INV_OUT_00) << std::endl;
+    std::cout << TestMathProOperations::Inv(TestMathProOperations::FN_INV_IN__01,
+                                            TestMathProOperations::FN_INV_OUT_01) << std::endl;
+    std::cout << TestMathProOperations::Inv(TestMathProOperations::FN_INV_IN__02,
+                                            TestMathProOperations::FN_INV_OUT_02) << std::endl;
 #endif
 #if 0
 	Matrix A(4, 4);
