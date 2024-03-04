@@ -244,11 +244,21 @@ public:
      *  @param c Правая диагональ
      *  @param Y Результатат СЛАУ
      *  @return x ответ
+     *  @throw NonFulfillmentOfConditions Ошибка не соответствие условие применению метода
      * */
     friend Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
 
+    /** @brief Метод Якоби
+     *  @param A
+     *  @param B
+     *  @param eps
+     *  @return
+     *  @throw SingularMatrix Определитель матрицы равено 0
+     *  @throw DimensionMismatch Матрицы не совместимы
+     *  @throw MethodJacobiBdetMore1 В методе Якоби abs(|B|) >= 1
+     * */
+    friend Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps);
 
-    friend Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B);
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
 
@@ -256,6 +266,6 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matrix) noexcept;
 Matrix operator*(double val, const Matrix &matrix) noexcept;
 Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
 Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
-Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B);
+Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps);
 
 #endif  // _MATRIX_H_

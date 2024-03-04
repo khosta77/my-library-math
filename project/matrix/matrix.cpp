@@ -344,7 +344,7 @@ Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, co
     const Matrix sle = getSleForThroughStraight(a, b, c, y);
 
     if (!checkConditionThroughStraight(sle))  // Достаточной условие примененния матода прогонки
-        throw;
+        throw NonFulfillmentOfConditions();
 
     const Matrix albe = SLEmethodThroughStraightRunning(sle);  // Прямой ход
     const Matrix x = SLEmethodThroughReverseСourse(sle, albe);  // Обратный ход
@@ -370,8 +370,33 @@ static Matrix getSleMethodJacobiCeM(const Matrix& AB) {
     return ce;
 }
 
+static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
+    const Matrix x = (x1 - x2);
+    double x_det = 1;
+    for (size_t i = 0; i < x.getRows(); ++i)
+        x_det *= x(i, 0);
+    return std::abs(x_det);
+}
+
+static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, const double& eps1) {
+    Matrix x1(beta.getRows(), 1), x2(beta.getRows(), 1);
+    size_t i = 0;
+    double x = 0.0;
+    for (i = 0; (x < eps1); ++i) {
+        if ((i % 2) == 0) {
+            x2 = ((beta * x1) + ce);
+            x = calcMethodJacobiAbsX(x2, x1);
+        } else {
+            x1 = ((beta * x2) + ce);
+            x = calcMethodJacobiAbsX(x1, x2);
+        }
+    }
+    std::cout << i << std::endl;
+    return ((i % 2) == 0) ? x2 : x1;
+}
+
 // friend
-Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B) {
+Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps) {
     if (A.det() == 0)
         throw SingularMatrix();
 	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull()))
@@ -379,18 +404,10 @@ Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B) {
 
     const Matrix AB = A.getExtendedMatrixOfTheSystem(B);
     const Matrix beta = getSleMethodJacobiBetaM(AB);
-    std::cout << "|beta| = " << beta.det() << std::endl;
+    const double Bdet = std::abs(beta.det());
+    if ((Bdet - 1) < 1e-7)
+        throw MethodJacobiBdetMore1();
     const Matrix ce = getSleMethodJacobiCeM(AB);
-    Matrix x1(AB.getRows(), 1), x2(AB.getRows(), 1);
-
-    size_t i = 0;
-    for (i = 0; i < 10; ++i) {
-        if ((i % 2) == 0) {
-            x2 = ((beta * x1) + ce);
-        } else {
-            x1 = ((beta * x2) + ce);
-        }
-    }
-    return ((i % 2) == 0) ? x2 : x1;
+    return enumerationMethodJacobi(beta, ce, ((1.0 - Bdet) / Bdet));
 }
 

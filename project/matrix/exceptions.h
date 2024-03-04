@@ -48,4 +48,18 @@ public:
     SingularMatrix() : MatrixException("Сингулярная матрица") {}
 };
 
+/** @brief Не выполненны условия для метода прогонки
+ * */
+class NonFulfillmentOfConditions : public MatrixException {
+public:
+    NonFulfillmentOfConditions() : MatrixException("Условия для метода прогонки не выполнены") {}
+};
+
+/** @brief В методе Якоби abs(|B|) >= 1
+ * */
+class MethodJacobiBdetMore1 : public MatrixException {
+public:
+    MethodJacobiBdetMore1() : MatrixException("В методе Якоби определитель B больше или равен 1") {}
+};
+
 #endif  // _EXCEPTIONS_MATRIX_H_
