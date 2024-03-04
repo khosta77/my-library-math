@@ -266,6 +266,6 @@ std::ostream& operator<<(std::ostream& os, const Matrix& matrix) noexcept;
 Matrix operator*(double val, const Matrix &matrix) noexcept;
 Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
 Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
-Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps);
+Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps = 1e-66);
 
 #endif  // _MATRIX_H_

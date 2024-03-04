@@ -370,7 +370,7 @@ static Matrix getSleMethodJacobiCeM(const Matrix& AB) {
     return ce;
 }
 
-static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
+[[maybe_unused]] static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
     const Matrix x = (x1 - x2);
     double x_det = 1;
     for (size_t i = 0; i < x.getRows(); ++i)
@@ -378,11 +378,11 @@ static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
     return std::abs(x_det);
 }
 
-static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, const double& eps1) {
+static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, [[maybe_unused]] const double& eps1) {
     Matrix x1(beta.getRows(), 1), x2(beta.getRows(), 1);
     size_t i = 0;
-    double x = 0.0;
-    for (i = 0; (x < eps1); ++i) {
+    double x = (eps1 + 1.0);
+    for (i = 0; x > eps1; ++i) {
         if ((i % 2) == 0) {
             x2 = ((beta * x1) + ce);
             x = calcMethodJacobiAbsX(x2, x1);
@@ -391,7 +391,6 @@ static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, cons
             x = calcMethodJacobiAbsX(x1, x2);
         }
     }
-    std::cout << i << std::endl;
     return ((i % 2) == 0) ? x2 : x1;
 }
 
@@ -405,9 +404,11 @@ Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps) {
     const Matrix AB = A.getExtendedMatrixOfTheSystem(B);
     const Matrix beta = getSleMethodJacobiBetaM(AB);
     const double Bdet = std::abs(beta.det());
-    if ((Bdet - 1) < 1e-7)
+    if (Bdet >= 1.0)
         throw MethodJacobiBdetMore1();
     const Matrix ce = getSleMethodJacobiCeM(AB);
-    return enumerationMethodJacobi(beta, ce, ((1.0 - Bdet) / Bdet));
+    const double eps1 = (((1.0 - Bdet) / Bdet) * eps);
+    return enumerationMethodJacobi(beta, ce, eps1);
 }
+
 
