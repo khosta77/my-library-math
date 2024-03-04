@@ -338,6 +338,7 @@ static Matrix SLEmethodThroughReverseСourse(const Matrix& sle, const Matrix& al
     return x;
 }
 
+// https://baktybek0v.github.io/tridiagonal-matrix/
 // friend
 Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& y) {
     const Matrix sle = getSleForThroughStraight(a, b, c, y);
@@ -350,4 +351,46 @@ Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, co
     return x;
 }
 
+static Matrix getSleMethodJacobiBetaM(const Matrix& AB) {
+    Matrix beta(AB.getRows(), (AB.getCols() - 1));
+    for (size_t i = 0; i < beta.getRows(); ++i)
+        for (size_t j = 0; j < beta.getCols(); ++j)
+            if (j != i)
+                beta(i, j) = ((-AB(i, j)) / AB(i, i));
+            else
+                beta(i, j) = 0;
+    return beta;
+}
+
+static Matrix getSleMethodJacobiCeM(const Matrix& AB) {
+    Matrix ce(AB.getRows(), 1);
+    const size_t last_elemen_j = (AB.getCols() - 1);
+    for (size_t i = 0; i < ce.getRows(); ++i)
+        ce(i, 0) = (AB(i, last_elemen_j) / AB(i, i));
+    return ce;
+}
+
+// friend
+Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B) {
+    if (A.det() == 0)
+        throw SingularMatrix();
+	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull()))
+        throw DimensionMismatch(A, B);
+
+    const Matrix AB = A.getExtendedMatrixOfTheSystem(B);
+    const Matrix beta = getSleMethodJacobiBetaM(AB);
+    std::cout << "|beta| = " << beta.det() << std::endl;
+    const Matrix ce = getSleMethodJacobiCeM(AB);
+    Matrix x1(AB.getRows(), 1), x2(AB.getRows(), 1);
+
+    size_t i = 0;
+    for (i = 0; i < 10; ++i) {
+        if ((i % 2) == 0) {
+            x2 = ((beta * x1) + ce);
+        } else {
+            x1 = ((beta * x2) + ce);
+        }
+    }
+    return ((i % 2) == 0) ? x2 : x1;
+}
 
