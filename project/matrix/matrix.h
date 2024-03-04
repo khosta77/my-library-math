@@ -237,12 +237,21 @@ public:
      *  @throw DimensionMismatch Матрицы не совместимы
      * */
     friend Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
+
+    /** @brief Метод прогонки
+     *  @param a Левая диагональ
+     *  @param b Центральная диагональ
+     *  @param c Правая диагональ
+     *  @param Y Результатат СЛАУ
+     *  @return x ответ
+     * */
+    friend Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
 
 std::ostream& operator<<(std::ostream& os, const Matrix& matrix) noexcept;
 Matrix operator*(double val, const Matrix &matrix) noexcept;
 Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
-
+Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
 
 #endif  // _MATRIX_H_

@@ -287,4 +287,67 @@ Matrix SLEmethodGauss(const Matrix& A, const Matrix& B) {
     return x;
 }
 
+static Matrix getSleForThroughStraight(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& y) {
+    Matrix sle(b.getRows(), 4);
+    const size_t ROW = sle.getRows();
+
+    sle(0, 0) = 0; sle(0, 1) = b(0, 0); sle(0, 2) = c(0, 0); sle(0, 3) = y(0, 0);
+    for (size_t i = 1; i < (ROW - 1); ++i) {
+        sle(i, 0) = a((i - 1), 0); sle(i, 1) = b(i, 0); sle(i, 2) = c(i, 0); sle(i, 3) = y(i, 0);
+    }
+    sle((ROW - 1), 0) = a((ROW - 2), 0);
+    sle((ROW - 1), 1) = b((ROW - 1), 0);
+    sle((ROW - 1), 3) = y((ROW - 1), 0);
+    return sle;
+}
+
+static bool checkConditionThroughStraight(const Matrix& sle) {
+    for (size_t i = 0; i < sle.getRows(); ++i)
+        if((std::abs(sle(i, 1)) < (std::abs(sle(i, 0)) + std::abs(sle(i, 2)))))
+            return false;
+    return true;
+}
+
+static Matrix SLEmethodThroughStraightRunning(const Matrix& sle) {
+    const size_t ROW = sle.getRows();
+    Matrix albe(ROW, 2);
+
+    //// Для i = 0
+    albe(0, 0) = (-sle(0, 2) / sle(0, 1)); albe(0, 1) = (sle(0, 3) / sle(0, 1));
+
+    //// Для i = 1:(n - 1)
+    double yi = 0.0;
+    for (size_t i = 1; i < (ROW - 1); ++i) {
+        yi = (sle(i, 1) + (sle(i, 0) * albe((i - 1), 0)));
+        albe(i, 0) = (-sle(i, 2) / yi);
+        albe(i, 1) = ((sle(i, 3) - (sle(i, 0) * (albe((i - 1), 1)))) / yi);
+    }
+
+    //// Для i = n
+    yi = (sle((ROW - 1), 1) + (sle((ROW - 1), 0) * albe((ROW - 2), 0)));
+    albe((ROW - 1), 1) = ((sle((ROW - 1), 3) - (sle((ROW - 1), 0) * albe((ROW - 2), 1))) / yi);
+
+    return albe;
+}
+
+static Matrix SLEmethodThroughReverseСourse(const Matrix& sle, const Matrix& albe) {
+    Matrix x(sle.getRows(), 1);
+    x((sle.getRows() - 1), 0) = albe((sle.getRows() - 1), 1);
+    for (size_t i = (sle.getRows() - 2); i < (sle.getRows()); --i)
+        x(i, 0) = (albe(i, 1) + (albe(i, 0) * x((i + 1), 0)));
+    return x;
+}
+
+// friend
+Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& y) {
+    const Matrix sle = getSleForThroughStraight(a, b, c, y);
+
+    if (!checkConditionThroughStraight(sle))  // Достаточной условие примененния матода прогонки
+        throw;
+
+    const Matrix albe = SLEmethodThroughStraightRunning(sle);  // Прямой ход
+    const Matrix x = SLEmethodThroughReverseСourse(sle, albe);  // Обратный ход
+    return x;
+}
+
 
