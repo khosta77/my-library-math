@@ -370,7 +370,7 @@ static Matrix getSleMethodJacobiCeM(const Matrix& AB) {
     return ce;
 }
 
-[[maybe_unused]] static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
+static double calcMethodJacobiAbsX(const Matrix& x1, const Matrix& x2) {
     const Matrix x = (x1 - x2);
     double x_det = 1;
     for (size_t i = 0; i < x.getRows(); ++i)
@@ -378,7 +378,7 @@ static Matrix getSleMethodJacobiCeM(const Matrix& AB) {
     return std::abs(x_det);
 }
 
-static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, [[maybe_unused]] const double& eps1) {
+static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, const double& eps1) {
     Matrix x1(beta.getRows(), 1), x2(beta.getRows(), 1);
     size_t i = 0;
     double x = (eps1 + 1.0);
@@ -391,6 +391,7 @@ static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, [[ma
             x = calcMethodJacobiAbsX(x1, x2);
         }
     }
+    // std::cout << i << std::endl;
     return ((i % 2) == 0) ? x2 : x1;
 }
 
@@ -409,6 +410,54 @@ Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps) {
     const Matrix ce = getSleMethodJacobiCeM(AB);
     const double eps1 = (((1.0 - Bdet) / Bdet) * eps);
     return enumerationMethodJacobi(beta, ce, eps1);
+}
+
+static Matrix getMatrixB1(const Matrix& beta) {
+    Matrix B1(beta.getRows(), beta.getCols());
+    for (size_t i = 0; i < beta.getRows(); ++i) {
+        for (size_t j = 0; j < i; ++j) {
+            B1(i, j) = beta(i, j);
+        }
+    }
+    return B1;
+}
+
+static Matrix enumerationMethodSeidel(const Matrix& B1, const Matrix& B2, const Matrix& ce, 
+                                      const double& eps2) {
+    Matrix x1(B1.getRows(), 1), x2(B1.getRows(), 1);
+    x2 = ((B2 * x1) + ce);
+    size_t i = 0;
+    double x = (eps2 + 1.0);
+    for (i = 0; x > eps2; ++i) {
+        if ((i % 2) == 0) {
+            x2 = ((B1 * x2) + (B2 * x1) + ce);
+            x = calcMethodJacobiAbsX(x2, x1);
+        } else {
+            x1 = ((B1 * x1) + (B2 * x2) + ce);
+            x = calcMethodJacobiAbsX(x1, x2);
+        }
+    }
+    // std::cout << i << std::endl;
+    return ((i % 2) == 0) ? x2 : x1;
+}
+
+// friend
+Matrix SLEmethodSeidel(const Matrix& A, const Matrix& B, const double& eps) {
+    if (A.det() == 0)
+        throw SingularMatrix();
+	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull()))
+        throw DimensionMismatch(A, B);
+
+    const Matrix AB = A.getExtendedMatrixOfTheSystem(B);
+    const Matrix beta = getSleMethodJacobiBetaM(AB);
+    const double Bdet = std::abs(beta.det());
+    if (Bdet >= 1.0)
+        throw MethodJacobiBdetMore1();
+    const Matrix B1 = getMatrixB1(beta);
+    const Matrix B2 = (beta - B1);
+    const Matrix ce = getSleMethodJacobiCeM(AB);
+    const double eps2 = (((1.0 - Bdet) / Bdet) * eps);
+    return enumerationMethodSeidel(B1, B2, ce, eps2);
 }
 
 

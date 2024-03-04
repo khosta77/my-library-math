@@ -259,6 +259,17 @@ public:
      * */
     friend Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps);
 
+    /** @brief Метод Зейделя
+     *  @param A
+     *  @param B
+     *  @param eps
+     *  @return
+     *  @throw SingularMatrix Определитель матрицы равено 0
+     *  @throw DimensionMismatch Матрицы не совместимы
+     *  @throw MethodJacobiBdetMore1 В методе Якоби abs(|B|) >= 1
+     * */
+    friend Matrix SLEmethodSeidel(const Matrix& A, const Matrix& B, const double& eps);
+
     /** @} */ // Конец группы: Продвинутые операции над матрицами
 };
 
@@ -267,5 +278,6 @@ Matrix operator*(double val, const Matrix &matrix) noexcept;
 Matrix SLEmethodGauss(const Matrix& A, const Matrix& B);
 Matrix SLEmethodRunThrough(const Matrix& a, const Matrix& b, const Matrix& c, const Matrix& Y);
 Matrix SLEmethodJacobi(const Matrix& A, const Matrix& B, const double& eps = 1e-66);
+Matrix SLEmethodSeidel(const Matrix& A, const Matrix& B, const double& eps = 1e-66);
 
 #endif  // _MATRIX_H_
