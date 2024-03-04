@@ -19,7 +19,7 @@ int main() {
 	A(3, 0) = 2.68; A(3, 1) = -3.29; A(3, 2) = 0.28; A(3, 3) = 13.4;
 	Matrix B(4, 1);
 	B(0, 0) = -83.32; B(1, 0) = 38.9; B(2, 0) = -56.7; B(3, 0) = -504.09;
-	Matrix x = SLEmethodJacobi(A, B);
+	Matrix x = SLEmethodSeidel(A, B, 1e-15);
 // 3.7777777777777812 -2.2222222222222361 0.44444444444444103 5.3333333333333419 
 	std::cout << x.transp() << std::endl;
 #endif
