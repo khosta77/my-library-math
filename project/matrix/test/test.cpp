@@ -2,6 +2,10 @@
 
 static STSL::TrueTest tt(true, 0, std::string("Филимонов Степан"));
 
+#define GAUSSE_CNT     2
+#define JACOBI_CNT     2
+#define RUNTHROUGH_CNT 1
+#define SEIDE_CNT      2
 
 void matrixtest::baseOperation() {
 	tt.NewGroup("Base operation");
@@ -68,11 +72,24 @@ void matrixtest::mathProOperation() {
 	tt.mt(TestMathProOperations::Inv(TestMathProOperations::FN_INV_IN__02,
                                      TestMathProOperations::FN_INV_OUT_02));
 }
-	
+
+void matrixtest::mathHighOperation() {
+	tt.NewGroup("Math high operation");
+    for (size_t i = 0; i < GAUSSE_CNT; ++i)
+        tt.mt(TestMathHighOperation::Gausse());
+    for (size_t i = 0; i < RUNTHROUGH_CNT; ++i)
+        tt.mt(TestMathHighOperation::RunThrough());
+    for (size_t i = 0; i < JACOBI_CNT; ++i)
+        tt.mt(TestMathHighOperation::Jacobi());
+    for (size_t i = 0; i < SEIDE_CNT; ++i)
+        tt.mt(TestMathHighOperation::Seidel());
+}
+
 void matrixtest::make() {
 	baseOperation();
 	mathBaseOperation();
 	mathProOperation();
+    mathHighOperation();
     tt.result_to_terminal();
 }
 
