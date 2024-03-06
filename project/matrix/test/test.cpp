@@ -2,10 +2,10 @@
 
 static STSL::TrueTest tt(true, 0, std::string("Филимонов Степан"));
 
-#define GAUSSE_CNT     2
-#define JACOBI_CNT     2
+#define GAUSSE_CNT     5
+#define JACOBI_CNT     6
 #define RUNTHROUGH_CNT 4
-#define SEIDE_CNT      2
+#define SEIDE_CNT      6
 
 void matrixtest::baseOperation() {
 	tt.NewGroup("Base operation");
