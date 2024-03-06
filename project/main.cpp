@@ -1,11 +1,11 @@
 #include "./matrix/test/test.h"
 
 int main() {        
-#if 1
+#if 0
     matrixtest::make();
-#elif 0  // Гаусс
-    const Matrix A = utils::readFromFile("./fasttest/a.txt");
-    const Matrix B = utils::readFromFile("./fasttest/b.txt");
+#elif 1  // Гаусс
+    const Matrix A = utils::readFromFile("./project/matrix/data/math_high_operation/Gausse/case_0/A.txt");
+    const Matrix B = utils::readFromFile("./project/matrix/data/math_high_operation/Gausse/case_0/B.txt");
     const Matrix x = SLEmethodGauss(A, B);
     std::cout << x;    
 #elif 0 // Якоби
