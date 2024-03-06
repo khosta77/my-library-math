@@ -4,7 +4,7 @@ static STSL::TrueTest tt(true, 0, std::string("Филимонов Степан")
 
 #define GAUSSE_CNT     2
 #define JACOBI_CNT     2
-#define RUNTHROUGH_CNT 1
+#define RUNTHROUGH_CNT 4
 #define SEIDE_CNT      2
 
 void matrixtest::baseOperation() {
