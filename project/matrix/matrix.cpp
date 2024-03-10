@@ -262,23 +262,23 @@ Matrix Matrix::getExtendedMatrixOfTheSystem(Matrix B) const {
 
 // friend
 Matrix SLEmethodGauss(const Matrix& A, const Matrix& B) {
-    if (A.det() == 0)
+    if (A.det() == 0)  // Проверка существует ли единственное решение
         throw SingularMatrix();
-	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull()))
+	if ((A.rows != B.rows) || (B.cols > 1) || (A.isNull()) || (B.isNull())) // проверка корректно ли вычисл.
         throw DimensionMismatch(A, B);
 
-    Matrix AB = A.getExtendedMatrixOfTheSystem(B);
+    Matrix AB = A.getExtendedMatrixOfTheSystem(B);  // Расширенная матрица системы
 
     const size_t row = AB.getRows();
     const size_t col = AB.getCols();
-    for (size_t i = 0; i < row; ++i) {
+    for (size_t i = 0; i < row; ++i) {  // Выбор главного элемента по столбцу
         for (size_t j = i; j < row; ++j)
-            AB.rationingRow(j, AB(j, i));
+            AB.rationingRow(j, AB(j, i));  // Деление строки, на элемент
         for (size_t j = (i + 1); j < row; ++j)
-            AB.minusRowRow(j, i);
+            AB.minusRowRow(j, i);  // Вычитание строки
     }
 
-    Matrix x(row, 1);
+    Matrix x(row, 1);  // Вычисление ответа путем обратного хода
     for (size_t i = (row - 1), k = (col - 2); ((i < row) && (col)); --i, --k) {
         x(i, 0) = AB(i, (col - 1));
         for (size_t j = (i - 1); j < row; --j)
