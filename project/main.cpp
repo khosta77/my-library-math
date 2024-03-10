@@ -6,8 +6,11 @@ int main() {
 #elif 1  // Гаусс
     const Matrix A = utils::readFromFile("./project/matrix/data/math_high_operation/Gausse/case_0/A.txt");
     const Matrix B = utils::readFromFile("./project/matrix/data/math_high_operation/Gausse/case_0/B.txt");
-    const Matrix x = SLEmethodGauss(A, B);
-    std::cout << x;    
+    const Matrix X = utils::readFromFile("./project/matrix/data/math_high_operation/Gausse/case_0/X.txt");
+    Matrix x = SLEmethodJacobi(A, B, 1e-35);
+    x = SLEmethodSeidel(A, B, 1e-35);
+    if (x != X)
+        std::cout << x << X;
 #elif 0 // Якоби
     const Matrix A = utils::readFromFile("./fasttest/a.txt");
     const Matrix B = utils::readFromFile("./fasttest/b.txt");
