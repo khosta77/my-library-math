@@ -391,7 +391,7 @@ static Matrix enumerationMethodJacobi(const Matrix& beta, const Matrix& ce, cons
             x = calcMethodJacobiAbsX(x1, x2);
         }
     }
-    // std::cout << i << std::endl;
+     std::cout << i << std::endl;
     return ((i % 2) == 0) ? x2 : x1;
 }
 
@@ -421,23 +421,47 @@ static Matrix getMatrixB1(const Matrix& beta) {
     }
     return B1;
 }
+/*
+static void SeidelScalar(Matrix& x, const Matrix& B1, const Matrix& B2, const Matrix& ce) {
+    const size_t row = B1.getRows();
+    const size_t col = B1.getCols();
 
+    for (size_t i = 1; i < col; ++i)
+        x(0, 0) += (B2(0, i) * x(i, 0));
+    x(0, 0) += ce(0, 0);
+
+    double buf_x_0 = 0.0;
+    double buf_x_1 = 0.0;
+
+    for (size_t i = 1; i < row; ++i) {
+        for (size_t k = 0; k < i; ++k)
+            buf_x_0 += (B1(i, k) * x(k, 0));
+        for (size_t k = i; k < col; ++k)
+            buf_x_1 += (B2(i, k) * x1(k, 0));
+        x2(i, 0) = (buf_x_0 + buf_x_1 + ce(i, 0));
+        buf_x_0 = 0.0;
+        buf_x_1 = 0.0;
+    }
+}
+*/
 static Matrix enumerationMethodSeidel(const Matrix& B1, const Matrix& B2, const Matrix& ce, 
                                       const double& eps2) {
     Matrix x1(B1.getRows(), 1), x2(B1.getRows(), 1);
     x2 = ((B2 * x1) + ce);
     size_t i = 0;
-    double x = (eps2 + 1.0);
+    [[maybe_unused]] double x = (eps2 + 1.0);
     for (i = 0; x > eps2; ++i) {
         if ((i % 2) == 0) {
+            //SeidelScalar(x1, x1, B1, B2, ce);
             x2 = ((B1 * x2) + (B2 * x1) + ce);
             x = calcMethodJacobiAbsX(x2, x1);
         } else {
+         //   SeidelScalar(x1, x1, B1, B2, ce);
             x1 = ((B1 * x1) + (B2 * x2) + ce);
             x = calcMethodJacobiAbsX(x1, x2);
         }
     }
-    // std::cout << i << std::endl;
+     std::cout << i << std::endl;
     return ((i % 2) == 0) ? x2 : x1;
 }
 
