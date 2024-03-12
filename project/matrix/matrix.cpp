@@ -292,7 +292,7 @@ static Matrix getSleForThroughStraight(const Matrix& a, const Matrix& b, const M
     const size_t ROW = sle.getRows();
 
     sle(0, 0) = 0; sle(0, 1) = b(0, 0); sle(0, 2) = c(0, 0); sle(0, 3) = y(0, 0);
-    for (size_t i = 1; i < (ROW - 1); ++i) {
+    for (size_t i = 1, _row = (ROW - 1); i < _row; ++i) {
         sle(i, 0) = a((i - 1), 0); sle(i, 1) = b(i, 0); sle(i, 2) = c(i, 0); sle(i, 3) = y(i, 0);
     }
     sle((ROW - 1), 0) = a((ROW - 2), 0);
